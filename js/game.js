@@ -30,11 +30,15 @@ monsterImage.onload = function () {
 monsterImage.src = "images/monster.png";
 
 // Game objects
+
 var hero = {
-	speed: 256 // movement in pixels per second
+	speed: 206 // movement in pixels per second
 };
+
 var monster = {};
 var monstersCaught = 0;
+var level; 
+
 
 // Handle keyboard controls
 var keysDown = {};
@@ -49,6 +53,7 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player catches a monster
 var reset = function () {
+	
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
 
@@ -57,8 +62,49 @@ var reset = function () {
 	monster.y = 32 + (Math.random() * (canvas.height - 64));
 };
 
+// get a random number
+function getRandomInt(min, max) {
+return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+var timer = 0;
+var lives = 3;  
+
+// Add game mechanic time vs monsters caught 
+
+setInterval(function(){
+
+	console.log("checking...")
+	
+	if (timer <= monstersCaught){ // did you catch a monster in interval?
+
+		console.log("you're ok")
+		++timer; 
+	} 
+
+	else {
+
+		console.log("you need to be faster")
+		timer = 0;
+		monstersCaught = 0; 
+		--lives;
+		console.log(lives);  
+
+		}
+
+		}, 2000 // 2 second 
+
+); // end of interval 
+
+
+
+
 // Update game objects
 var update = function (modifier) {
+
+	level = monstersCaught; 
+
 	if (38 in keysDown) { // Player holding up
 		hero.y -= hero.speed * modifier;
 	}
@@ -82,9 +128,30 @@ var update = function (modifier) {
 		++monstersCaught;
 		reset();
 	}
-};
+
+
+	// is hero near edge of canvas?
+
+	if (hero.x >= canvas.width - 44){ hero.x = 44;}
+
+	else if (hero.x <= 44){ hero.x = canvas.width - 44}
+
+	else if (hero.y <= 44){ hero.y = canvas.height - 44}
+
+	else if (hero.y >= canvas.height - 44){ hero.y = 44}
+
+	//
+	if (lives <= 0){
+
+	console.log("game over");
+
+	}
+
+
+}; // end update 
 
 // Draw everything
+
 var render = function () {
 	if (bgReady) {
 		ctx.drawImage(bgImage, 0, 0);
@@ -96,14 +163,28 @@ var render = function () {
 
 	if (monsterReady) {
 		ctx.drawImage(monsterImage, monster.x, monster.y);
+		
+	}
+
+	if (monsterReady) {
+		ctx.drawImage(monsterImage, monster.x, monster.y);
+		
 	}
 
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.font = "24px Helvetica";
+	ctx.font = "18px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
 	ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
+
+	//
+	ctx.fillStyle = "rgb(250, 250, 250)";
+	ctx.font = "18px Helvetica";
+	ctx.textAlign = "right";
+	ctx.textBaseline = "top";
+	ctx.fillText("Timer " + timer, 482, 32);
+
 };
 
 // The main game loop
